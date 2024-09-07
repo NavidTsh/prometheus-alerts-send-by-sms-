@@ -45,7 +45,7 @@ services:
       - grafana-storage:/var/lib/grafana
     networks:
       vpcbr:
-        ipv4_address: 192.168.10.12
+        ipv4_address: 192.168.40.12
 volumes:
   prometheus-database: null
   grafana-storage: null
