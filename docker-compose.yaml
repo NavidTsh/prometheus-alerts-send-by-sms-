@@ -1,0 +1,58 @@
+---
+version: 3
+services:
+  prometheus:
+    restart: always
+    image: ubuntu/prometheus:latest
+    container_name: Prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-database:/prometheus
+    expose:
+      - '9090'
+    ports:
+      - '9090:9090'
+    networks:
+      vpcbr:
+        ipv4_address: 192.168.40.10
+  alertmanager:
+    restart: always
+    depend_on:
+      - Prometheus
+    image: prom/alertmanager:latest
+    container_name: AlertManager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yaml'
+    volumes:
+      - ./prometheus/alertmanager.yaml:/etc/alertmanager/alertmanager.yaml
+    expose:
+      - '9093'
+    ports: '9093:9093'
+    networks:
+      vpcbr:
+        ipv4_address: 192.168.40.11
+  grafana:
+    restart: unless_stopped
+    container_name: Grafana
+    depend_on:
+      - Prometheus
+    image: grafana/grafana:latest
+    expose: '3000'
+    ports: '3000:3000'
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      vpcbr:
+        ipv4_address: 192.168.10.12
+volumes:
+  prometheus-database: null
+  grafana-storage: null
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.40.0/24
+          getway: 192.168.40.1
